@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -44,7 +43,8 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        RotateRelativeToMouse();
+        //RotateRelativeToMouse();
+        RotateRelativeToAccelerometer();
         Move();
         Suck();
     }
@@ -61,6 +61,34 @@ public class Player : MonoBehaviour
             mousePos.y = mousePos.y - objectPos.y;
 
             float angle = Mathf.Atan2(mousePos.y, mousePos.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle - 90));
+        }
+    }
+
+    private void RotateRelativeToAccelerometer()
+    {
+        if (!lockRotate)
+        {
+            Vector3 dir = Vector3.zero;
+            // we assume that the device is held parallel to the ground
+            // and the Home button is in the right hand
+
+            // remap the device acceleration axis to game coordinates:
+            // 1) XY plane of the device is mapped onto XZ plane
+            // 2) rotated 90 degrees around Y axis
+
+            dir.x = -Input.acceleration.y;
+            dir.z = Input.acceleration.x;
+
+            // clamp acceleration vector to the unit sphere
+            if (dir.sqrMagnitude > 1)
+                dir.Normalize();
+
+            // Make it move 10 meters per second instead of 10 meters per frame...
+            dir *= Time.deltaTime;
+
+            // Rotate object
+            float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle - 90));
         }
     }
@@ -89,7 +117,6 @@ public class Player : MonoBehaviour
             }
 
             GameObject[] cores = GameObject.FindGameObjectsWithTag("Enemy");
-
             foreach (var core in cores)
             {
                 Enemy enemyScript = core.GetComponent<Enemy>();
