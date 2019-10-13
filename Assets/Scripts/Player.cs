@@ -64,7 +64,7 @@ public class Player : MonoBehaviour
             transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle - 90));
         }
     }
-
+    // lol
     private void RotateRelativeToAccelerometer()
     {
         if (!lockRotate)
