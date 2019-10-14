@@ -34,7 +34,7 @@ public class Player : MonoBehaviour
         gridPositions.Clear();
         rb = GetComponent<Rigidbody2D>();
         radius = Mathf.FloorToInt(diameter / 2);
-        Debug.Log("Diameter:"+diameter+" Radius:"+radius);
+        Debug.Log("Diameter:" + diameter + " Radius:" + radius);
     }
 
     private void Update()
@@ -44,9 +44,10 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //RotateRelativeToMouse();
-        RotateRelativeToAccelerometer();
+        RotateRelativeToMouse();
+        //RotateRelativeToAccelerometer();
         Move();
+        //MovePhone();
         Suck();
     }
 
@@ -90,6 +91,17 @@ public class Player : MonoBehaviour
             if (Input.GetKey(KeyCode.W))
             {
                 rb.AddForce(transform.up * speed / (mass / 5));
+            }
+        }
+    }
+
+    private void MovePhone()
+    {
+        foreach (Touch touch in Input.touches)
+        {
+            if (touch.phase == TouchPhase.Stationary)
+            {
+                rb.AddForce(transform.up * speed / (mass/5));
             }
         }
     }
