@@ -21,6 +21,8 @@ public class Player : MonoBehaviour
     private int blueBlockCount = 0;
     private List<Vector2> redBlockPositions = new List<Vector2>();
     private bool inEditMode = false;
+    private bool isMoving = false;
+    public bool IsMoving { set { isMoving = value; }}
     private List<Vector2> gridPositions = new List<Vector2>();
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -44,10 +46,9 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        RotateRelativeToMouse();
-        //RotateRelativeToAccelerometer();
-        Move();
-        //MovePhone();
+        //RotateRelativeToMouse();
+        RotateRelativeToAccelerometer();
+        //Move();
         Suck();
     }
 
@@ -86,23 +87,9 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
-        if (blueBlockCount > 0)
+        if (blueBlockCount > 0 && !isMoving)
         {
-            if (Input.GetKey(KeyCode.W))
-            {
-                rb.AddForce(transform.up * speed / (mass / 5));
-            }
-        }
-    }
-
-    private void MovePhone()
-    {
-        foreach (Touch touch in Input.touches)
-        {
-            if (touch.phase == TouchPhase.Stationary)
-            {
-                rb.AddForce(transform.up * speed / (mass/5));
-            }
+            rb.AddForce(transform.up * speed / (mass / 5));
         }
     }
 
