@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
     public int diameter = 2;
     public float speed = 2f;
+    public float rotationSpeed = 2f;
     public float maxSpeed = 100f;
 
     public int mass = 10;
@@ -69,27 +70,16 @@ public class Player : MonoBehaviour
     {
         if (!lockRotate)
         {
-            Vector3 dir = Vector3.zero;
-            // we assume that the device is held parallel to the ground
-            // and the Home button is in the right hand
+            // copy the rotation of the object itself into a buffer
+            Quaternion localRotation = transform.rotation;
 
-            // remap the device acceleration axis to game coordinates:
-            // 1) XY plane of the device is mapped onto XZ plane
-            // 2) rotated 90 degrees around Y axis
+            // find speed based on delta
+            float curSpeed = Time.deltaTime * rotationSpeed;
+            // first update the current rotation angles with input from acceleration axis
+            localRotation.z += Input.acceleration.x * curSpeed;
 
-            dir.x = -Input.acceleration.y;
-            dir.z = Input.acceleration.x;
-
-            // clamp acceleration vector to the unit sphere
-            if (dir.sqrMagnitude > 1)
-                dir.Normalize();
-
-            // Make it move 10 meters per second instead of 10 meters per frame...
-            dir *= Time.deltaTime;
-
-            // Rotate object
-            float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle - 90));
+            // then rotate this object accordingly to the new angle
+            transform.rotation = localRotation;
         }
     }
 
@@ -184,7 +174,6 @@ public class Player : MonoBehaviour
     {
         inventory.Container.Clear();
     }
-
 
     private void Edit()
     {
