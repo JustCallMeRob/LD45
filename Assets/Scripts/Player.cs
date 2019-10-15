@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public int diameter = 2;
-    public float speed = 2f;
-    public float rotationSpeed = 2f;
-    public float maxSpeed = 100f;
+    public int diameter;
+    public float speed;
+    public float rotationSpeed;
+    public float maxSpeed;
 
-    public int mass = 10;
+    public int mass;
     public Rigidbody2D rb;
     public Inventory inventory;
     public GameObject empty;
@@ -18,11 +18,27 @@ public class Player : MonoBehaviour
 
     private List<GameObject> empties = new List<GameObject>();
     private int radius;
-    private int blueBlockCount = 0;
+    private int blueBlockCount = 1;
+    private bool isInEditingMode = false;
+    private float attackTimer = 0f;
+    private float attackTimeDelay = 0.5f;
     private List<Vector2> redBlockPositions = new List<Vector2>();
-    private bool inEditMode = false;
+
+    private bool isEditing = false;
+    public bool IsEditing { set { isEditing = value; } }
+
     private bool isMoving = false;
     public bool IsMoving { set { isMoving = value; }}
+
+    private bool isAttacking = false;
+    public bool IsAttacking { set { 
+            isAttacking = value;
+            attackTimer = attackTimeDelay;
+        } }
+
+    private bool isSucking = false;
+    public bool IsSucking { set { isSucking = value; } }
+
     private List<Vector2> gridPositions = new List<Vector2>();
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -30,13 +46,11 @@ public class Player : MonoBehaviour
         Debug.Log(collision.collider.tag);
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         gridPositions.Clear();
         rb = GetComponent<Rigidbody2D>();
         radius = Mathf.FloorToInt(diameter / 2);
-        Debug.Log("Diameter:" + diameter + " Radius:" + radius);
     }
 
     private void Update()
@@ -46,9 +60,8 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //RotateRelativeToMouse();
         RotateRelativeToAccelerometer();
-        //Move();
+        Move();
         Suck();
     }
 
@@ -87,15 +100,29 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
-        if (blueBlockCount > 0 && !isMoving)
+        if (blueBlockCount > 0 && isMoving)
         {
             rb.AddForce(transform.up * speed / (mass / 5));
         }
     }
 
+    public void Attack(Transform transform)
+    {
+        if (isAttacking)
+        {
+            attackTimer += Time.deltaTime;
+            if (attackTimer >= attackTimeDelay)
+            {
+                attackTimer = 0f;
+                transform.gameObject.GetComponent<BoxCollider2D>().enabled = false;
+                Instantiate(bullet, transform.position, transform.rotation);
+            }
+        }
+    }
+
     private void Suck()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (isSucking)
         {
             GameObject[] blocks = GameObject.FindGameObjectsWithTag("Block");
             foreach (var block in blocks)
@@ -176,32 +203,29 @@ public class Player : MonoBehaviour
 
     private void Edit()
     {
-        if (Input.GetKeyDown(KeyCode.E) && !inEditMode)
+        if (isEditing && !isInEditingMode)
         {
-            inEditMode = true;
+            isInEditingMode = true;
             lockRotate = true;
             Time.timeScale = 0.3f;
-            if (inEditMode)
+            for (int y = -radius; y < diameter - radius; y++)
             {
-                for (int y = -radius; y < diameter - radius; y++)
+                for (int x = -radius; x < diameter - radius; x++)
                 {
-                    for (int x = -radius; x < diameter - radius; x++)
+                    if (x == 0 && y == 0)
                     {
-                        if (x == 0 && y == 0)
-                        {
-                            continue;
-                        }
-                        GameObject current = Instantiate(empty, this.transform);
-                        current.GetComponent<Empty>().SetGridPosition(x, y);
-                        empties.Add(current);
-                        current.transform.localPosition = new Vector3(x / this.transform.localScale.x, y / this.transform.localScale.y, 1f);
+                        continue;
                     }
+                    GameObject current = Instantiate(empty, this.transform);
+                    current.GetComponent<Empty>().SetGridPosition(x, y);
+                    empties.Add(current);
+                    current.transform.localPosition = new Vector3(x / this.transform.localScale.x, y / this.transform.localScale.y, 1f);
                 }
             }
         }
-        else if (Input.GetKeyUp(KeyCode.E))
+        else if (!isEditing)
         {
-            inEditMode = false;
+            isInEditingMode = false;
             lockRotate = false;
             Time.timeScale = 1f;
             foreach (var empty in empties)

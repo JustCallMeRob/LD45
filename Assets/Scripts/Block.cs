@@ -18,7 +18,7 @@ public class Block : MonoBehaviour
 
     private void Awake()
     {
-        player = GameObject.FindGameObjectsWithTag("Player")[0].GetComponent<Player>();
+        player = FindObjectOfType<Player>();
         bc = GetComponent<BoxCollider2D>();
         rb = GetComponent<Rigidbody2D>();
     }
@@ -49,11 +49,7 @@ public class Block : MonoBehaviour
         {
             if (type == BlockTypes.Red)
             {
-                if (Input.GetKeyDown(KeyCode.Mouse0))
-                {
-                    gameObject.GetComponent<BoxCollider2D>().enabled = false;
-                    GameObject bullet = Instantiate(player.bullet, transform.position, transform.rotation);
-                }
+                player.Attack(gameObject.transform);
             }
         }
     }

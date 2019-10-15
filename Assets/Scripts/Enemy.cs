@@ -20,7 +20,7 @@ public class Enemy : MonoBehaviour
 
     private void Awake()
     {
-        player = GameObject.FindGameObjectsWithTag("Player")[0].GetComponent<Player>();
+        player = FindObjectOfType<Player>();
     }
 
     private void FixedUpdate()
