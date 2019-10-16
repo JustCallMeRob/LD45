@@ -107,6 +107,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // Trigger the red blocks to attack
     public void Attack(Transform transform)
     {
         if (isAttacking)
