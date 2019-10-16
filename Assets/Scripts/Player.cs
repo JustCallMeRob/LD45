@@ -98,6 +98,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // Move the player character based on the number of attached blue blocks and their mass
     private void Move()
     {
         if (blueBlockCount > 0 && isMoving)
